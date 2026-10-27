@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  project：Maven POM 文件的根元素。
+  xmlns 等是 XML 命名空间和 Schema 位置，用于校验 POM 格式。
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <!--
+    modelVersion：POM 模型版本。
+    Maven 2.x/3.x/4.x 都使用 4.0.0，一般不需要改。
+  -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!--
+    groupId：项目所属的组织或公司标识，通常用反向域名。
+    artifactId：项目名称或模块名。
+    version：项目版本号。SNAPSHOT 表示快照版本，还在开发中。
+    这三者合起来构成 Maven 坐标（GAV），唯一标识一个构件。
+  -->
+  <groupId>com.runtu.app</groupId>
+  <artifactId>my-app</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <!--
+    name：项目的显示名称，便于阅读。
+    url：项目主页地址。FIXME 提示需要改成实际网站。
+  -->
+  <name>my-app</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <!--
+    properties：定义可复用的属性（变量）。
+    可以在 POM 其他位置用 ${属性名} 引用。
+  -->
+  <properties>
+    <!-- 项目构建时使用的源码编码 -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- 编译时使用的 Java 版本，这里指定为 21 -->
+    <maven.compiler.release>21</maven.compiler.release>
+  </properties>
+
+  <!--
+    dependencyManagement：依赖管理。
+    这里声明的依赖不会直接引入项目，而是用于统一管理版本。
+    子模块或当前项目在 <dependencies> 中引用时，可以省略版本号。
+  -->
+  <dependencyManagement>
+    <dependencies>
+      <!--
+        导入 JUnit 的 BOM（Bill of Materials）。
+        type 为 pom，scope 为 import，表示将其中的依赖版本管理导入到当前 POM。
+        这样下面引用 JUnit Jupiter 相关依赖时就不需要再写版本号。
+      -->
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.11.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.21.0</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <!--
+    dependencies：项目实际使用的依赖。
+    这里的依赖会被下载并加入到编译、测试等类路径中。
+  -->
+  <dependencies>
+    <!--
+      JUnit Jupiter API：用于编写测试。
+      scope 为 test，表示只在测试编译和运行阶段使用，不会打包到最终产物。
+      版本由上面的 junit-bom 统一管理，所以这里不写版本号。
+    -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Optionally: parameterized tests support -->
+    <!--
+      JUnit Jupiter Params：支持参数化测试。
+      同样是 test 作用域，版本由 BOM 管理。
+    -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <!--
+    build：与构建相关的配置。
+  -->
+  <build>
+    <!--
+      pluginManagement：插件管理。
+      这里配置的插件不会自动执行，而是为子模块或当前项目中的 <plugins> 提供统一的版本和配置。
+      这样可以锁定插件版本，避免使用 Maven 默认版本导致构建不稳定。
+    -->
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!--
+          clean 生命周期插件：用于清理 target 目录。
+          参考：https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle
+        -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.4.0</version>
+        </plugin>
+
+        <!--
+          默认生命周期中 jar 打包相关的插件绑定。
+          参考：https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging
+        -->
+
+        <!-- 资源处理插件：复制 src/main/resources 和 src/test/resources 下的文件 -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+
+        <!-- 编译插件：编译 Java 源代码 -->
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.13.0</version>
+        </plugin>
+
+        <!-- 测试运行插件：执行单元测试 -->
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
+
+        <!-- 打包插件：将项目打包成 jar -->
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.4.2</version>
+        </plugin>
+
+        <!-- 安装插件：将构件安装到本地仓库 -->
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+
+        <!-- 部署插件：将构件部署到远程仓库 -->
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+
+        <!--
+          site 生命周期插件：生成项目站点文档。
+          参考：https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle
+        -->
+
+        <!-- 站点生成插件 -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.12.1</version>
+        </plugin>
+
+        <!-- 项目信息报告插件：为站点生成项目报告 -->
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.6.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
